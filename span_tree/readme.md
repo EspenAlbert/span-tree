@@ -1,0 +1,84 @@
+# log-tree
+- features
+  - trees instead of flat log messages
+  - crash_reports/annotating errors
+    - support marking error as crash/silenced in UI
+    - support marking error with OK/ERROR/CRASH
+  - find slow functions/threads
+  - distributed tracing
+  - Smart printing
+    - to terminal when running on localhost
+    - only json when running on cloud/only normal logging no stdout/stderr?
+    - smart at grouping together tasks and flushing before exit
+  - secret_hiding?
+- In action use:
+  - {extra|debug/info/warning|action|tree|ref_src|ref_dest}
+  - on each "node"
+    - call_location
+    - file_location <-- used only locally during debug
+  - ref_src|ref_dest
+    - uuid4
+    - ref_src created on a tree when dumping a message and adding the ref to e.g., metadata
+      - during injection an alternative index of ref_src -> tree
+    - ref_dest used on a tree when parsing back the message then logging with log_ref(ref_dest)
+- "test-mode": record all trees instead of just printing
+- 3rd-party
+  - localhost, depend on rich
+  - container, only httpx/request for forwarding
+  - depends a bit on the database
+- SaaS
+  - DB injector
+    - api-key in header
+    - payload(tags, list(action))
+    - Use a pydantic class for finding all ref_src and ref_dest
+  - RunSequenceGetter
+    - unique sequence number per tags combination
+  - API
+    - small DB wrapper support using CLI or future frontend app
+  - UI?
+    - using same python code as rich and returning html?
+- CLI
+  - Select namespace (or selected directly if it already exists)
+  - Select trees based on tags
+  - See dashboard of Name|Status|Counts|LastTime
+  - Toggle error/crash/ok/all
+  - Toggle show slow/fast/all
+  - Query for filtering tasks
+  - Inside an action
+    - Toggle for Debug/Info/Warning/Error/Critical
+    - Arrow keys for choosing parents or scrolling down
+- Video of traditional/tree based logging
+  - src doe on one side
+  - stdout on other side
+- rich based tracebacks & locals collection?
+  - Long tracebacks might not be necessary if I have call location
+- CLI -> API -> DB
+- CLI -> DB when using database directly
+- Later
+  - Support creating alarms, graphs, etc.
+  - Support search like feature like Kibana
+  - Support pre-defined dashboards
+
+## Implementation
+- principles
+  - Never more than 1 action active per task, when "root-action" finishes, ALL subtasks must finish
+  - Errors are stored and tracked when the parent completes
+    - only logged with traceback if `logger.exception(error)` | or `__exit__` of root action has the error
+- DataModel
+  - client
+    - list(namespaces)
+  - namespace
+    - api_key
+    - tags|labels
+  - tree
+    - list(action)
+  - action
+    - ts_start
+    - ts_end
+    - status=runs|OK|FAIL|CRASH?
+
+## Resources
+- How does it integrate with Open Telemetry?
+  - [Observability with InfluxDB and Open Telemetry](https://www.youtube.com/watch?v=LFAGFX_aCY8)
+  - [Open Telemetry](https://www.youtube.com/watch?v=oe5YYh9mhzw)
+  - [aws open telemetry for lambda](https://aws-otel.github.io/docs/getting-started/lambda)
