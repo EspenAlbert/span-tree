@@ -13,8 +13,8 @@ from typing import Any, Callable
 from rich.traceback import Traceback, Frame
 from typing_extensions import TypeAlias
 
-from log_tree.constants import ErrorTuple
-from log_tree.log_action import LogAction
+from span_tree.constants import ErrorTuple
+from span_tree.log_action import LogAction
 
 logger = logging.getLogger(__name__)
 

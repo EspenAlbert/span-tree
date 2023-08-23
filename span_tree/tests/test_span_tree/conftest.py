@@ -6,11 +6,11 @@ import pytest
 from rich.console import Console
 from rich.tree import Tree
 
-from log_tree import log_tree
-from log_tree.handler import configure
-from log_tree.log_action import LogAction
-from log_tree.log_tree import clear_tree_state, LogTree, temp_publisher
-from log_tree.log_tree_publisher import tree_publisher
+from span_tree import log_tree
+from span_tree.handler import configure
+from span_tree.log_action import LogAction
+from span_tree.log_tree import clear_tree_state, LogTree, temp_publisher
+from span_tree.log_tree_publisher import tree_publisher
 
 FLUSH_INTERVAL_SECONDS = 0.1
 

@@ -6,12 +6,12 @@ from rich.traceback import Trace, Traceback
 from rich.tree import Tree
 from typing_extensions import TypeAlias
 
-from log_tree.log_action import (
+from span_tree.log_action import (
     NODE_TYPE_EXIT_ERROR,
     as_tree_child_id,
     as_tree_parent_id,
 )
-from log_tree.log_tree import LogTree
+from span_tree.log_tree import LogTree
 from zero_3rdparty.datetime_utils import dump_date_as_rfc3339
 
 MAX_FRAMES_ERROR = 5

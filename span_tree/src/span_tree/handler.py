@@ -7,9 +7,9 @@ from typing import TextIO, Callable, TypeVar
 
 from typing_extensions import ParamSpec
 
-from log_tree.call_location import as_caller_name
-from log_tree.constants import EXTRA_NAME, CALL_LOCATION, REF_SRC, REF_DEST
-from log_tree.log_tree import (
+from span_tree.call_location import as_caller_name
+from span_tree.constants import EXTRA_NAME, CALL_LOCATION, REF_SRC, REF_DEST
+from span_tree.log_tree import (
     LogTree,
     current_tree_or_none,
     set_tree_publisher,
@@ -31,7 +31,7 @@ class MyHandler(logging.Handler):
         self.stream = stream
         if render_trees:
 
-            from log_tree.rich_rendering import print_tree_call
+            from span_tree.rich_rendering import print_tree_call
 
             set_tree_publisher(print_tree_call())
 
@@ -93,7 +93,7 @@ def configure(
 ):
     tags = tags or {}
     handler_dict = {
-        "()": "log_tree.handler.create_handler",
+        "()": "span_tree.handler.create_handler",
         "level": logging.INFO,
         "stream": "ext://sys.stdout",
         "render_trees": render_trees,

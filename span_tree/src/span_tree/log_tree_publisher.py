@@ -9,9 +9,9 @@ from rich import get_console
 from rich.console import Console
 from rich.tree import Tree
 
-from log_tree.handler import skip_wrap
-from log_tree.log_tree import LogTree
-from log_tree.rich_rendering import HasParentTreeError, create_rich_tree
+from span_tree.handler import skip_wrap
+from span_tree.log_tree import LogTree
+from span_tree.rich_rendering import HasParentTreeError, create_rich_tree
 from zero_3rdparty.closable_queue import ClosableQueue
 
 logger = logging.getLogger(__name__)

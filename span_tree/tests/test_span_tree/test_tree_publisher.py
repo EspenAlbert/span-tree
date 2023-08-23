@@ -5,8 +5,8 @@ from concurrent.futures import Future, ThreadPoolExecutor
 
 import pytest
 
-from log_tree.api import new_action, logger_log_extra
-from test_log_tree.conftest import wait_for_printed_trees
+from span_tree.api import new_action, logger_log_extra
+from test_span_tree.conftest import wait_for_printed_trees
 
 logger, log_extra = logger_log_extra(__name__)
 TIMEOUT = 1

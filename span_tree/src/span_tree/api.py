@@ -4,9 +4,9 @@ import logging
 from functools import wraps, partial
 from typing import Protocol, ContextManager, Any, Callable, TypeVar, cast
 
-from log_tree.constants import EXTRA_NAME, REF_SRC, REF_DEST
-from log_tree.log_action import LogAction
-from log_tree.log_tree import current_tree_or_none, LogTree
+from span_tree.constants import EXTRA_NAME, REF_SRC, REF_DEST
+from span_tree.log_action import LogAction
+from span_tree.log_tree import current_tree_or_none, LogTree
 from zero_3rdparty.id_creator import uuid4_hex
 from zero_3rdparty.object_name import as_name
 

@@ -1,7 +1,7 @@
 import pytest
 
-from log_tree import get_logger
-from log_tree.log_action import LogAction
+from span_tree import get_logger
+from span_tree.log_action import LogAction
 
 logger = get_logger(__name__)
 
@@ -23,17 +23,17 @@ def test_log_levels_logged(all_trees):
     assert list(action.iter_nodes()) == [
         (
             "INFO_1",
-            "2020-01-01T00:00:00.000 INFO    MainThread test_log_tree.test_handler 17 "
+            "2020-01-01T00:00:00.000 INFO    MainThread test_span_tree.test_handler 17 "
             "info-msg",
         ),
         (
             "WARNING_2",
-            "2020-01-01T00:00:00.000 WARNING MainThread test_log_tree.test_handler 18 "
+            "2020-01-01T00:00:00.000 WARNING MainThread test_span_tree.test_handler 18 "
             "warning-msg",
         ),
         (
             "ERROR_3",
-            "2020-01-01T00:00:00.000 ERROR   MainThread test_log_tree.test_handler 19 "
+            "2020-01-01T00:00:00.000 ERROR   MainThread test_span_tree.test_handler 19 "
             "error-msg",
         ),
     ]

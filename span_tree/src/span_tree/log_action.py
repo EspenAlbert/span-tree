@@ -6,8 +6,8 @@ from typing import Callable, Literal, Any, Iterable
 
 from rich.traceback import Trace
 
-from log_tree.call_location import as_caller_name
-from log_tree.constants import (
+from span_tree.call_location import as_caller_name
+from span_tree.constants import (
     ACTION_STATUS_FIELD,
     STATUS_CREATED,
     ON_EXIT,

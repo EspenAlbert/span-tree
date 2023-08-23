@@ -34,7 +34,7 @@
 Basically, an Enhanced stdlib logger:
 
 ```python
-from log_tree import get_logger
+from span_tree import get_logger
 
 logger = get_logger(__name__)
 logger.log(level,

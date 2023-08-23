@@ -7,9 +7,9 @@ from threading import Thread
 
 import pytest
 
-from log_tree.api import new_action, get_logger
-from log_tree.handler import skip_wrap
-from log_tree.log_tree import get_tree_state
+from span_tree.api import new_action, get_logger
+from span_tree.handler import skip_wrap
+from span_tree.log_tree import get_tree_state
 
 logger = get_logger(__name__)
 

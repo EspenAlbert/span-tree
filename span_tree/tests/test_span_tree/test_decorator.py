@@ -1,7 +1,7 @@
 from __future__ import annotations
 
-from log_tree import get_logger
-from test_log_tree.conftest import tree_by_name
+from span_tree import get_logger
+from test_span_tree.conftest import tree_by_name
 from zero_3rdparty.object_name import as_name
 
 logger = get_logger(__name__)

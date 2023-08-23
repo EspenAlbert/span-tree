@@ -1,6 +1,6 @@
-from log_tree import get_logger
-from log_tree.log_tree import LogTree, get_tree_state
-from test_log_tree.conftest import tree_by_name
+from span_tree import get_logger
+from span_tree.log_tree import LogTree, get_tree_state
+from test_span_tree.conftest import tree_by_name
 
 logger = get_logger(__name__)
 

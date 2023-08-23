@@ -1,5 +1,5 @@
-from log_tree.api import get_logger
-from test_log_tree.conftest import tree_by_name
+from span_tree.api import get_logger
+from test_span_tree.conftest import tree_by_name
 
 logger = get_logger(__name__)
 

@@ -2,8 +2,8 @@ import pytest
 from rich.pretty import Node
 from rich.traceback import Trace
 
-from log_tree import get_logger
-from test_log_tree.conftest import tree_by_name, action_key_value
+from span_tree import get_logger
+from test_span_tree.conftest import tree_by_name, action_key_value
 
 logger = get_logger(__name__)
 
