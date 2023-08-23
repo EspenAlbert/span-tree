@@ -3,7 +3,7 @@ from __future__ import annotations
 import logging
 from collections import UserDict
 from time import time
-from typing import Any, Callable, Iterable, Literal
+from typing import Any, Callable, Iterable, Literal, Type, TypeVar
 
 from rich.traceback import Trace
 
@@ -33,6 +33,8 @@ NODE_TYPE_REF_SRC = "ref_src"
 NODE_TYPE_REF_DEST = "ref_dest"
 NODE_TYPE_TREE_CHILD = "trace_child"
 NODE_TYPE_TREE_PARENT = "trace_parent"
+_EVENTS = "__EVENTS__"
+T = TypeVar("T")
 
 
 def as_trace_child_id(key: str, value: Any) -> str | None:
@@ -56,11 +58,12 @@ class LogSpan(UserDict):
         on_exit: Callable[[LogSpan, ErrorTuple | None], None] | None = None,
         *args,
         **kwargs,
-    ):
+    ) -> None:
         super().__init__(*args, **kwargs)
         self[SPAN_STATUS_FIELD] = STATUS_CREATED
         self[_NODE_COUNTER] = 0
         self[SPAN_NAME_FIELD] = name
+        self[_EVENTS] = []
         if on_exit:
             self[ON_EXIT] = on_exit
 
@@ -126,67 +129,57 @@ class LogSpan(UserDict):
 
     @property
     def refs_src(self) -> Iterable[str]:
-        for key, ref in self.iter_nodes():
-            if key.startswith(NODE_TYPE_REF_SRC):
-                yield ref
+        yield from self.events_filter(NODE_TYPE_REF_SRC, str)
 
     @property
     def refs_dest(self) -> Iterable[str]:
-        for key, ref in self.iter_nodes():
-            if key.startswith(NODE_TYPE_REF_DEST):
-                yield ref
+        yield from self.events_filter(NODE_TYPE_REF_DEST, str)
 
     def next_child_index(self) -> int:
         current_child = self.setdefault(_CHILD_INDEX, -1)
         child_number = self[_CHILD_INDEX] = current_child + 1
         # ADDING a child placeholder used for rendering the trace
-        self[f"{_CHILD_PLACEHOLDER}{child_number}"] = ...
+        self.add_event(_CHILD_PLACEHOLDER, ...)
         return child_number
 
-    def _next_node_counter_key(self, group: str) -> str:
-        counter = self[_NODE_COUNTER] + 1
-        self[_NODE_COUNTER] = counter
-        return f"{group}_{counter}"
-
     def add_extra(self, extra: dict[str, Any]) -> None:
-        self[self._next_node_counter_key("extra")] = extra
+        self.add_event("extra", extra)
 
     def add_log(self, level: str, message: str) -> None:
-        self[self._next_node_counter_key(level)] = message
+        self.add_event(level, message)
 
     def add_trace_parent(self, name: str, trace_id: str) -> None:
-        self[self._next_node_counter_key(NODE_TYPE_TREE_PARENT)] = dict(
-            name=name, trace_id=trace_id
-        )
+        self.add_event(NODE_TYPE_TREE_PARENT, dict(name=name, trace_id=trace_id))
 
     def add_trace_child(self, child_id: str) -> None:
-        self[self._next_node_counter_key(NODE_TYPE_TREE_CHILD)] = dict(id=child_id)
+        self.add_event(NODE_TYPE_TREE_CHILD, dict(id=child_id))
 
-    def iter_nodes(self) -> Iterable[tuple[str, Any]]:
-        key: str
-        for key, value in self.items():
-            if "_" in key and key.rsplit("_", maxsplit=1)[1].isdigit():
-                yield key, value
+    @property
+    def events(self) -> list[tuple[str, Any]]:
+        return [(k, v) for (k, v) in self[_EVENTS] if not k.startswith("__")]
 
-    def iter_nodes_with_child_placeholders(self) -> Iterable[tuple[str, Any]]:
-        key: str
-        for key, value in self.items():
-            if value is ...:
-                yield key, value
-                continue
-            if "_" in key and key.rsplit("_", maxsplit=1)[1].isdigit():
-                yield key, value
+    def events_filter(self, event_type: str, t: Type[T]) -> Iterable[T]:
+        for i_type, event in self.events:
+            if i_type == event_type:
+                yield event
+
+    def add_event(self, event_type: str, event: Any) -> None:
+        self[_EVENTS].append((event_type, event))
+
+    @property
+    def events_with_child_placeholders(self) -> Iterable[tuple[str, Any]]:
+        return self[_EVENTS]
 
     def add_exit_trace(self, trace: Trace, call_trace: str) -> None:
-        self[self._next_node_counter_key(NODE_TYPE_EXIT_ERROR)] = trace
-        self[self._next_node_counter_key("call_trace")] = call_trace
+        self.add_event(NODE_TYPE_EXIT_ERROR, trace)
+        self.add_event("call_trace", call_trace)
 
     def add_except_trace(self, trace: Trace, call_trace: str) -> None:
-        self[self._next_node_counter_key(NODE_TYPE_EXCEPT_ERROR)] = trace
-        self[self._next_node_counter_key("call_trace")] = call_trace
+        self.add_event(NODE_TYPE_EXCEPT_ERROR, trace)
+        self.add_event("call_trace", call_trace)
 
     def add_ref_src(self, ref: str):
-        self[self._next_node_counter_key(NODE_TYPE_REF_SRC)] = ref
+        self.add_event(NODE_TYPE_REF_SRC, ref)
 
     def add_ref_dest(self, ref: str):
-        self[self._next_node_counter_key(NODE_TYPE_REF_DEST)] = ref
+        self.add_event(NODE_TYPE_REF_DEST, ref)

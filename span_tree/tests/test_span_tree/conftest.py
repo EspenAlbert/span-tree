@@ -85,13 +85,13 @@ T = TypeVar("T")
 
 
 def span_values(span: LogSpan, value_type: Type[T]) -> Iterable[T]:
-    for _, value in span.iter_nodes():
+    for _, value in span.events:
         if isinstance(value, value_type):
             yield value
 
 
 def span_key_value(span: LogSpan, value_type: Type[T]) -> tuple[str, T]:
-    for key, value in span.iter_nodes():
+    for key, value in span.events:
         if isinstance(value, value_type):
             return key, value
     raise StopIteration

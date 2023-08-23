@@ -128,17 +128,17 @@ def convert_tree(
     root, add_span_node = _tree_and_node_adder(trace)
     node_adder = node_adder or _default_node_adder
 
-    for trace_index, a in trace.spans.items():
-        color = "green" if a.is_ok else "red"
-        ts = dump_date_as_rfc3339(a.timestamp, strip_microseconds=True).replace(
+    for trace_index, span in trace.spans.items():
+        color = "green" if span.is_ok else "red"
+        ts = dump_date_as_rfc3339(span.timestamp, strip_microseconds=True).replace(
             "+00:00", "Z"
         )
-        span_header = f"[b {color}]{a.name} => {a.status}[/] [cyan]{ts}[/] ⧖ [blue]{a.duration_ms*1000:.3f}ms[/]"
+        span_header = f"[b {color}]{span.name} => {span.status}[/] [cyan]{ts}[/] ⧖ [blue]{span.duration_ms*1000:.3f}ms[/]"
 
         node = add_span_node(trace_index, span_header)
         if render_call_locations:
-            node.add(a.call_location)
-        for key, value in a.iter_nodes_with_child_placeholders():
+            node.add(span.call_location)
+        for key, value in span.events_with_child_placeholders:
             if value is ...:
                 node.children.append(...)
                 # will be replaced by next span

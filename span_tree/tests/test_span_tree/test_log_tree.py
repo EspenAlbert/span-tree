@@ -61,10 +61,8 @@ def test_trace_ref(all_traces):
             logger.log_extra(root2=True)
     root_trace = trace_by_name(all_traces, "root")
     root2_trace = trace_by_name(all_traces, "root2")
-    assert list(root2_trace.root_span.iter_nodes()) == [
-        ("extra_1", {"root2": True}),
-    ]
-    assert list(root_trace.root_span.iter_nodes()) == []
+    assert root2_trace.root_span.events == [("extra", {"root2": True})]
+    assert root_trace.root_span.events == []
 
 
 def test_ref_src(all_traces):

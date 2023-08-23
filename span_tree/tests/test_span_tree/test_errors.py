@@ -35,7 +35,7 @@ def test_caught_error(all_traces):
             logger.exception(e)
     trace = trace_by_name(all_traces, "catcher")
     key, trace = span_key_value(trace.root_span, Trace)
-    assert key == "except_error_1"
+    assert key == "except_error"
     frame_names = [frame.name for frame in trace.stacks[0].frames]
     raiser_name = raise_me.__name__
     catcher = test_caught_error.__name__
@@ -75,4 +75,4 @@ def test_nested_error_all_the_way(all_traces):
                 raise_me()
     trace = trace_by_name(all_traces, "root")
     key, trace = span_key_value(trace.root_span, Trace)
-    assert key == "exit_error_1"
+    assert key == "exit_error"

@@ -13,9 +13,9 @@ def test_new_span(all_traces):
         logger.log_extra(in_parent=True)
     trace = trace_by_name(all_traces, "api-root")
     assert len(trace.spans) == 2
-    assert [key for key, _ in trace.root_span.iter_nodes()] == ["INFO_1", "extra_2"]
+    assert [key for key, _ in trace.root_span.events] == ["INFO", "extra"]
     last_span = list(trace.spans.values())[-1]
-    assert [key for key, _ in last_span.iter_nodes()] == ["extra_1", "INFO_2"]
+    assert [key for key, _ in last_span.events] == ["extra", "INFO"]
 
 
 def test_decorator(all_traces):

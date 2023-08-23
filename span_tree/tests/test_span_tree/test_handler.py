@@ -20,19 +20,19 @@ def test_log_levels_logged(all_traces):
     assert len(all_traces) == 1
     trace = all_traces[0]
     span: LogSpan = trace.spans["0"]
-    assert list(span.iter_nodes()) == [
+    assert span.events == [
         (
-            "INFO_1",
+            "INFO",
             "2020-01-01T00:00:00.000 INFO    MainThread test_span_tree.test_handler 17 "
             "info-msg",
         ),
         (
-            "WARNING_2",
+            "WARNING",
             "2020-01-01T00:00:00.000 WARNING MainThread test_span_tree.test_handler 18 "
             "warning-msg",
         ),
         (
-            "ERROR_3",
+            "ERROR",
             "2020-01-01T00:00:00.000 ERROR   MainThread test_span_tree.test_handler 19 "
             "error-msg",
         ),
