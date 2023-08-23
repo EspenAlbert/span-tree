@@ -3,6 +3,7 @@ version: "0.0.1"
 packages:
 - pydantic==2.2.1
 - pydantic-settings==2.0.3
+- requests==2.31.0
 - rich==13.5.2
 - typing_extensions
 - zero-3rdparty==0.0.27
