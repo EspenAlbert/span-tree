@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from types import TracebackType
-from typing import Type, Optional
+from typing import Optional, Type
 
 from typing_extensions import TypeAlias
 
@@ -25,4 +25,6 @@ ASYNC_TASK_NAME = "async_task_name"
 ON_EXIT = "__on_exit"
 PARENT_TASK_ID = "parent_task_id"
 CHILDREN_TASK_IDS = "children_task_ids"
-ErrorTuple: TypeAlias = tuple[Type[BaseException],BaseException, Optional[TracebackType]]
+ErrorTuple: TypeAlias = tuple[
+    Type[BaseException], BaseException, Optional[TracebackType]
+]

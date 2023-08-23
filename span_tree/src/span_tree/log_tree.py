@@ -3,14 +3,14 @@ from __future__ import annotations
 import itertools
 import logging
 from asyncio import current_task as current_async_task
-from contextlib import suppress, contextmanager
+from contextlib import contextmanager, suppress
 from contextvars import ContextVar, Token
 from dataclasses import dataclass, field
 from functools import cached_property
 from threading import current_thread
 from typing import Any, Callable
 
-from rich.traceback import Traceback, Frame
+from rich.traceback import Frame, Traceback
 from typing_extensions import TypeAlias
 
 from span_tree.constants import ErrorTuple
@@ -99,7 +99,7 @@ class LogTree:
         caller_name: str,
         caller_path: str,
         caller_lineno: int,
-        call_trace: str
+        call_trace: str,
     ) -> None:
         trace = Traceback.extract(*error_tuple, show_locals=True)
         if caller_path == __file__ and caller_name == "on_action_exit_tree":
@@ -171,7 +171,7 @@ def clear_tree_state():
 
 
 def default_tree_publisher(tree: LogTree):
-    print(f"log-tree done: {tree}")
+    print(f"log-tree done: {tree}")  # noqa: T201
 
 
 TreePublisher: TypeAlias = Callable[[LogTree], Any]
@@ -181,6 +181,7 @@ _tree_publisher: TreePublisher = default_tree_publisher
 def set_tree_publisher(publisher: TreePublisher):
     global _tree_publisher
     _tree_publisher = publisher
+
 
 @contextmanager
 def temp_publisher(publisher: TreePublisher):

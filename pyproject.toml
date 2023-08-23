@@ -26,3 +26,6 @@ multiline-quotes = "double"
 
 [tool.ruff.isort]
 known-first-party = ["tests"]
+
+[tool.coverage.run]
+omit = ["*/tests/**", "*/test/**"]

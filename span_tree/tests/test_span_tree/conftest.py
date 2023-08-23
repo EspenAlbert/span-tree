@@ -1,5 +1,5 @@
 import time
-from typing import TypeVar, Type, Iterable, Any, Callable
+from typing import Any, Callable, Iterable, Type, TypeVar
 from unittest.mock import MagicMock
 
 import pytest
@@ -9,7 +9,7 @@ from rich.tree import Tree
 from span_tree import log_tree
 from span_tree.handler import configure
 from span_tree.log_action import LogAction
-from span_tree.log_tree import clear_tree_state, LogTree, temp_publisher
+from span_tree.log_tree import LogTree, clear_tree_state, temp_publisher
 from span_tree.log_tree_publisher import tree_publisher
 
 FLUSH_INTERVAL_SECONDS = 0.1
@@ -35,7 +35,7 @@ def printed_trees() -> list[Tree]:
         no_color=False,
         force_terminal=True,
     )
-    time.sleep(0.001) # adding a little sleep to make output be nicer
+    time.sleep(0.001)  # adding a little sleep to make output be nicer
     for t in trees:
         new_console.print(t)
     new_console.file.flush()

@@ -3,9 +3,10 @@ from rich.pretty import Node
 from rich.traceback import Trace
 
 from span_tree import get_logger
-from test_span_tree.conftest import tree_by_name, action_key_value
+from test_span_tree.conftest import action_key_value, tree_by_name
 
 logger = get_logger(__name__)
+
 
 class _Error(Exception):
     pass

@@ -1,10 +1,11 @@
 from contextlib import contextmanager
-from typing import Callable, Any
+from typing import Any, Callable
 
 from rich.console import Console
 from rich.traceback import Trace, Traceback
 from rich.tree import Tree
 from typing_extensions import TypeAlias
+from zero_3rdparty.datetime_utils import dump_date_as_rfc3339
 
 from span_tree.log_action import (
     NODE_TYPE_EXIT_ERROR,
@@ -12,7 +13,6 @@ from span_tree.log_action import (
     as_tree_parent_id,
 )
 from span_tree.log_tree import LogTree
-from zero_3rdparty.datetime_utils import dump_date_as_rfc3339
 
 MAX_FRAMES_ERROR = 5
 

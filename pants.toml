@@ -20,27 +20,28 @@ backend_packages = [
 
 [python]
 enable_resolves = true
-interpreter_constraints = ["==3.10.*"]
+interpreter_constraints = ["==3.11.*"]
 
 [python.resolves]
 python-default = "3rdparty/python-default.lock"
 
 [python.resolves_to_interpreter_constraints]
-python-default = ["==3.10.*"]
+python-default = ["==3.11.*"]
 
 [black]
 config = "pyproject.toml"
 install_from_resolve = "python-default"
-interpreter_constraints = ["==3.10.*"]
+interpreter_constraints = ["==3.11.*"]
 
 [mypy]
 config = "pyproject.toml"
 install_from_resolve = "python-default"
-interpreter_constraints = ["==3.10.*"]
+interpreter_constraints = ["==3.11.*"]
 
 [coverage-py]
+config = "pyproject.toml"
 install_from_resolve = "python-default"
-interpreter_constraints = ["==3.10.*"]
+interpreter_constraints = ["==3.11.*"]
 requirements = ["coverage[toml]>=6.5,<8"]
 report = ["xml", "html"]
 
@@ -60,7 +61,7 @@ requirements = [
 [ruff]
 config = "pyproject.toml"
 install_from_resolve = "python-default"
-interpreter_constraints = ["==3.10.*"]
+interpreter_constraints = ["==3.11.*"]
 args = "--ignore=I001"
 
 [generate-lockfiles]
@@ -69,3 +70,6 @@ diff = true
 [source]
 root_patterns = ["*/src", "*/tests", "3rdparty"]
 # PANTS_BASE_END
+
+[tailor]
+ignore_adding_targets=["_pants:_pants"]

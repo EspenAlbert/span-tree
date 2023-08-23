@@ -3,21 +3,21 @@ import os
 import sys
 from concurrent.futures import ThreadPoolExecutor
 from threading import Thread
-from typing import TextIO, Callable, TypeVar
+from typing import Callable, TextIO, TypeVar
 
 from typing_extensions import ParamSpec
-
-from span_tree.call_location import as_caller_name
-from span_tree.constants import EXTRA_NAME, CALL_LOCATION, REF_SRC, REF_DEST
-from span_tree.log_tree import (
-    LogTree,
-    current_tree_or_none,
-    set_tree_publisher,
-    next_tree_id,
-)
 from zero_3rdparty.error import error_and_traceback
 from zero_3rdparty.logging_utils import setup_logging
 from zero_3rdparty.object_name import as_name
+
+from span_tree.call_location import as_caller_name
+from span_tree.constants import CALL_LOCATION, EXTRA_NAME, REF_DEST, REF_SRC
+from span_tree.log_tree import (
+    LogTree,
+    current_tree_or_none,
+    next_tree_id,
+    set_tree_publisher,
+)
 
 
 class MyHandler(logging.Handler):
@@ -30,7 +30,6 @@ class MyHandler(logging.Handler):
         super().__init__(level)
         self.stream = stream
         if render_trees:
-
             from span_tree.rich_rendering import print_tree_call
 
             set_tree_publisher(print_tree_call())

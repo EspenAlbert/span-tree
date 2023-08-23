@@ -5,7 +5,7 @@ from concurrent.futures import Future, ThreadPoolExecutor
 
 import pytest
 
-from span_tree.api import new_action, logger_log_extra
+from span_tree.api import logger_log_extra, new_action
 from test_span_tree.conftest import wait_for_printed_trees
 
 logger, log_extra = logger_log_extra(__name__)

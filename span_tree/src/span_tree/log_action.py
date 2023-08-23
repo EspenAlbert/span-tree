@@ -1,23 +1,26 @@
 from __future__ import annotations
+
 import logging
 from collections import UserDict
 from time import time
-from typing import Callable, Literal, Any, Iterable
+from typing import Any, Callable, Iterable, Literal
 
 from rich.traceback import Trace
 
 from span_tree.call_location import as_caller_name
 from span_tree.constants import (
-    ACTION_STATUS_FIELD,
-    STATUS_CREATED,
-    ON_EXIT,
-    STATUS_STARTED,
-    STATUS_FAILED,
-    STATUS_SUCCEEDED,
-    ASYNC_TASK_NAME,
     ACTION_NAME_FIELD,
+    ACTION_STATUS_FIELD,
+    ASYNC_TASK_NAME,
+    CALL_LOCATION,
+    ON_EXIT,
+    STATUS_CREATED,
+    STATUS_FAILED,
+    STATUS_STARTED,
+    STATUS_SUCCEEDED,
+    TS_END_FIELD,
     TS_START_FIELD,
-    TS_END_FIELD, ErrorTuple, CALL_LOCATION,
+    ErrorTuple,
 )
 
 logger = logging.getLogger(__name__)
@@ -44,6 +47,8 @@ def as_tree_parent_id(key: str, value: Any) -> str | None:
         assert isinstance(value, dict)
         return value["tree_id"]
     return None
+
+
 class LogAction(UserDict):
     def __init__(
         self,

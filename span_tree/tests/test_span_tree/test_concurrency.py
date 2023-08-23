@@ -7,7 +7,7 @@ from threading import Thread
 
 import pytest
 
-from span_tree.api import new_action, get_logger
+from span_tree.api import get_logger, new_action
 from span_tree.handler import skip_wrap
 from span_tree.log_tree import get_tree_state
 
@@ -51,7 +51,7 @@ def test_spawning_multiple_threads_should_create_one_tree_per_thread(with_parent
                 )
         time.sleep(0.03)
         task_state = get_tree_state()
-        print(task_state)
+        logger.info(task_state)
         assert len(task_state) == 5
         time.sleep(0.11)
     assert len(get_tree_state()) == 0

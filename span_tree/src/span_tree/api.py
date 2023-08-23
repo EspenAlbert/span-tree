@@ -1,14 +1,15 @@
 from __future__ import annotations
 
 import logging
-from functools import wraps, partial
-from typing import Protocol, ContextManager, Any, Callable, TypeVar, cast
+from functools import partial, wraps
+from typing import Any, Callable, ContextManager, Protocol, TypeVar, cast
 
-from span_tree.constants import EXTRA_NAME, REF_SRC, REF_DEST
-from span_tree.log_action import LogAction
-from span_tree.log_tree import current_tree_or_none, LogTree
 from zero_3rdparty.id_creator import uuid4_hex
 from zero_3rdparty.object_name import as_name
+
+from span_tree.constants import EXTRA_NAME, REF_DEST, REF_SRC
+from span_tree.log_action import LogAction
+from span_tree.log_tree import LogTree, current_tree_or_none
 
 
 class LogExtra(Protocol):
@@ -115,7 +116,9 @@ class ActionLogger(logging.LoggerAdapter):
     ) -> ContextManager[LogAction]:
         return new_action(name, force_new_tree, **kwargs)
 
-    def __call__(self, name: str, force_new_tree: bool = False, **kwargs) -> ContextManager[LogAction]:
+    def __call__(
+        self, name: str, force_new_tree: bool = False, **kwargs
+    ) -> ContextManager[LogAction]:
         return new_action(name, force_new_tree, **kwargs)
 
     @staticmethod
