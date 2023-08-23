@@ -1,4 +1,4 @@
-# span-tree
+# span-trace
 
 ## Goals
 
@@ -10,8 +10,8 @@
 
 ## Features in library
 
-- trace-trees instead of flat log messages
-    - a trace tree can have multiple "spans" as nodes
+- trace-traces instead of flat log messages
+    - a trace trace can have multiple "spans" as nodes
     - on each "node"
         - file_location
         - start and end timestamps
@@ -22,12 +22,12 @@
             - level
     - each trace use a [ksuid](https://github.com/segmentio/ksuid) to ensure it is unique
     - each span has a name which is explicitly set or based on function name/call-context
-    - trees are linked together when a new thread/task is started from an existing tree
+    - traces are linked together when a new thread/task is started from an existing trace
 - Smart printing
     - to terminal when running on localhost
     - only json when running on cloud/only normal logging no stdout/stderr?
     - smart at grouping together tasks and flushing before exit
-- "test-mode": record all trees instead of just printing
+- "test-mode": record all traces instead of just printing
 
 ## How to use the library
 
@@ -58,21 +58,21 @@ logger.log_extra(msg: str = "", level: int = INFO, ** kwargs)  # to add attribut
     - either a 32 bytes hex
     - or a full ksuid
 - Select namespace (or selected directly if it already exists)
-- Select trees based on tags
+- Select traces based on tags
 - See dashboard of Name|Status|Counts|LastTime
 - Toggle error/crash/ok/all
 - Toggle show slow/fast/all
 - Query for filtering tasks
-- Inside an action
+- Inside an span
     - Toggle for Debug/Info/Warning/Error/Critical
     - Arrow keys for choosing parents or scrolling down
 
 ## How to run and 3rdparty dependencies
 
 - when running on localhost
-    - depend on rich to see trees directly
+    - depend on rich to see traces directly
 - when running in a container/lambda service
-    1. by default dumps the tree to stdout (need to configure receiver to parse this logs somehow)
+    1. by default dumps the trace to stdout (need to configure receiver to parse this logs somehow)
     2. use httpx/request for forwarding directly
 - when debugging
     - can run with database dependency directly and inject to local database to help localhost debugging
@@ -80,12 +80,12 @@ logger.log_extra(msg: str = "", level: int = INFO, ** kwargs)  # to add attribut
 ## DB Layer
 
 - api-key in header
-- payload(tags, list(action))
+- payload(tags, list(span))
 - Use a pydantic class for finding all ref_src and ref_dest
 
 ## Showcase (todo)
 
-- Video of traditional/tree based logging
+- Video of traditional/trace based logging
     - src stdout on one side
     - stdout on other side
 
@@ -93,9 +93,9 @@ logger.log_extra(msg: str = "", level: int = INFO, ** kwargs)  # to add attribut
 
 - ref_src|ref_dest
     - uuid4
-    - ref_src created on a tree when dumping a message and adding the ref to e.g., metadata
-        - during injection an alternative index of ref_src -> tree
-    - ref_dest used on a tree when parsing back the message then logging with log_ref(ref_dest)
+    - ref_src created on a trace when dumping a message and adding the ref to e.g., metadata
+        - during injection an alternative index of ref_src -> trace
+    - ref_dest used on a trace when parsing back the message then logging with log_ref(ref_dest)
 
     - RunSequenceGetter
         - unique sequence number per tags combination
@@ -114,9 +114,9 @@ logger.log_extra(msg: str = "", level: int = INFO, ** kwargs)  # to add attribut
 ## Implementation details
 
 - principles
-    - Never more than 1 action active per task, when "root-action" finishes, ALL subtasks must finish
+    - Never more than 1 span active per task, when "root-span" finishes, ALL subtasks must finish
     - Errors are stored and tracked when the parent completes
-        - only logged with traceback if `logger.exception(error)` | or `__exit__` of root action has the error
+        - only logged with traceback if `logger.exception(error)` | or `__exit__` of root span has the error
 - DataModel
     - user
         - email
@@ -132,7 +132,7 @@ logger.log_extra(msg: str = "", level: int = INFO, ** kwargs)  # to add attribut
             - versions
             - counter
             - last_ts
-    - tree/trace
+    - trace/trace
         - list(span)
     - spans
         - ts_start
@@ -154,7 +154,7 @@ logger.log_extra(msg: str = "", level: int = INFO, ** kwargs)  # to add attribut
         - toml
         - json
 - A local "minimal-system" working
-    - span-tree used in library with a publisher that writes to a DB
+    - span-trace used in library with a publisher that writes to a DB
     - a textual CLI for viewing the traces
 - A local "full-system" working
     - Support annotating traces

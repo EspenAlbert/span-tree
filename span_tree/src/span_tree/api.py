@@ -8,8 +8,8 @@ from zero_3rdparty.id_creator import uuid4_hex
 from zero_3rdparty.object_name import as_name
 
 from span_tree.constants import EXTRA_NAME, REF_DEST, REF_SRC
-from span_tree.log_action import LogAction
-from span_tree.log_tree import LogTree, current_tree_or_none
+from span_tree.log_span import LogSpan
+from span_tree.log_trace import LogTrace, current_trace_or_none
 
 
 class LogExtra(Protocol):
@@ -56,22 +56,22 @@ def as_log_extra(logger: logging.Logger) -> LogExtra:
     return cast(LogExtra, partial(log_extra, logger))
 
 
-def new_action(
-    name: str, force_new_tree: bool = False, **kwargs
-) -> ContextManager[LogAction]:
-    if force_new_tree:
-        return LogTree(name, action_kwargs=kwargs)
-    if parent := current_tree_or_none():
-        return parent.add_action(name, kwargs)
-    return LogTree(name, action_kwargs=kwargs)
+def new_span(
+    name: str, force_new_trace: bool = False, **kwargs
+) -> ContextManager[LogSpan]:
+    if force_new_trace:
+        return LogTrace(name, span_kwargs=kwargs)
+    if parent := current_trace_or_none():
+        return parent.add_span(name, kwargs)
+    return LogTrace(name, span_kwargs=kwargs)
 
 
 T = TypeVar("T")
 __DECORATED_CHECK = f"{__name__}_decorator"
 
 
-def action(
-    name: str | T = "", force_new_tree: bool = False, **log_kwargs
+def span(
+    name: str | T = "", force_new_trace: bool = False, **log_kwargs
 ) -> Callable[[T], T] | T:
     def decorator(f: T):
         nonlocal name
@@ -84,7 +84,7 @@ def action(
 
         @wraps(f)
         def inner(*args, **kwargs):
-            with new_action(name, force_new_tree=force_new_tree, **log_kwargs):
+            with new_span(name, force_new_trace=force_new_trace, **log_kwargs):
                 return f(*args, **kwargs)
 
         return inner
@@ -94,7 +94,7 @@ def action(
     return decorator
 
 
-class ActionLogger(logging.LoggerAdapter):
+class SpanLogger(logging.LoggerAdapter):
     # cannot be named "extra" as that is the name of the extra on the instance
     def log_extra(
         self,
@@ -111,26 +111,26 @@ class ActionLogger(logging.LoggerAdapter):
         )
 
     @staticmethod
-    def new_action(
-        name: str, force_new_tree: bool = False, **kwargs
-    ) -> ContextManager[LogAction]:
-        return new_action(name, force_new_tree, **kwargs)
+    def new_span(
+        name: str, force_new_trace: bool = False, **kwargs
+    ) -> ContextManager[LogSpan]:
+        return new_span(name, force_new_trace, **kwargs)
 
     def __call__(
-        self, name: str, force_new_tree: bool = False, **kwargs
-    ) -> ContextManager[LogAction]:
-        return new_action(name, force_new_tree, **kwargs)
+        self, name: str, force_new_trace: bool = False, **kwargs
+    ) -> ContextManager[LogSpan]:
+        return new_span(name, force_new_trace, **kwargs)
 
     @staticmethod
-    def action(
-        name: str | T = "", force_new_tree: bool = False, **log_kwargs
+    def span(
+        name: str | T = "", force_new_trace: bool = False, **log_kwargs
     ) -> Callable[[T], T] | T:
-        return action(name, force_new_tree, **log_kwargs)
+        return span(name, force_new_trace, **log_kwargs)
 
 
-def get_logger(name: str) -> ActionLogger:
+def get_logger(name: str) -> SpanLogger:
     logger = logging.getLogger(name)
-    return ActionLogger(logger)
+    return SpanLogger(logger)
 
 
 getLogger = get_logger

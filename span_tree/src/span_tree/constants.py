@@ -5,11 +5,11 @@ from typing import Optional, Type
 
 from typing_extensions import TypeAlias
 
-EXTRA_NAME = "log_tree"
+EXTRA_NAME = "log_trace"
 REF_SRC = "__REF_SRC"
 REF_DEST = "__REF_DEST"
-ACTION_STATUS_FIELD = "action_status"
-ACTION_NAME_FIELD = "action_name"
+SPAN_STATUS_FIELD = "span_status"
+SPAN_NAME_FIELD = "span_name"
 
 STATUS_CREATED = "created"
 STATUS_STARTED = "started"

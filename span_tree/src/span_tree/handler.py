@@ -12,11 +12,11 @@ from zero_3rdparty.object_name import as_name
 
 from span_tree.call_location import as_caller_name
 from span_tree.constants import CALL_LOCATION, EXTRA_NAME, REF_DEST, REF_SRC
-from span_tree.log_tree import (
-    LogTree,
-    current_tree_or_none,
-    next_tree_id,
-    set_tree_publisher,
+from span_tree.log_trace import (
+    LogTrace,
+    current_trace_or_none,
+    next_trace_id,
+    set_trace_publisher,
 )
 
 
@@ -25,14 +25,14 @@ class MyHandler(logging.Handler):
         self,
         level=logging.NOTSET,
         stream: TextIO = sys.stdout,
-        render_trees: bool = False,
+        render_traces: bool = False,
     ):
         super().__init__(level)
         self.stream = stream
-        if render_trees:
-            from span_tree.rich_rendering import print_tree_call
+        if render_traces:
+            from span_tree.rich_rendering import print_trace_call
 
-            set_tree_publisher(print_tree_call())
+            set_trace_publisher(print_trace_call())
 
     def emit(self, record: logging.LogRecord) -> None:
         try:
@@ -41,9 +41,9 @@ class MyHandler(logging.Handler):
             if has_msg:
                 self.stream.write(f"{text}\n")
             extra = getattr(record, EXTRA_NAME, None)
-            if tree := current_tree_or_none():
+            if trace := current_trace_or_none():
                 if exc_info := record.exc_info:
-                    tree.handle_error(
+                    trace.handle_error(
                         exc_info,  # type: ignore
                         caller_name=record.funcName,
                         caller_path=record.pathname,
@@ -51,15 +51,15 @@ class MyHandler(logging.Handler):
                         call_trace=text,
                     )
                     return
-                action = tree.current_action
+                span = trace.current_span
                 if has_msg:
-                    action.add_log(record.levelname, text)
+                    span.add_log(record.levelname, text)
                 if extra:
-                    action.add_extra(extra)
+                    span.add_extra(extra)
                 if ref := getattr(record, REF_SRC, None):
-                    action.add_ref_src(ref)
+                    span.add_ref_src(ref)
                 if ref := getattr(record, REF_DEST, None):
-                    action.add_ref_dest(ref)
+                    span.add_ref_dest(ref)
                 return
             if extra:
                 self._dump_extras(record, extra)
@@ -79,14 +79,14 @@ class MyHandler(logging.Handler):
         self.stream.write("\n")
 
 
-def create_handler(stream: TextIO, render_trees: bool) -> MyHandler:
-    return MyHandler(stream=stream, render_trees=render_trees)
+def create_handler(stream: TextIO, render_traces: bool) -> MyHandler:
+    return MyHandler(stream=stream, render_traces=render_traces)
 
 
 def configure(
     api_key: str = "",
     /,
-    render_trees: bool = False,
+    render_traces: bool = False,
     tags: dict[str, str] | None = None,
     disable_prev_logger: bool = False,
 ):
@@ -95,7 +95,7 @@ def configure(
         "()": "span_tree.handler.create_handler",
         "level": logging.INFO,
         "stream": "ext://sys.stdout",
-        "render_trees": render_trees,
+        "render_traces": render_traces,
     }
 
     setup_logging(handler_dict, disable_stream_handler=disable_prev_logger)
@@ -117,19 +117,19 @@ def wrap_call(func: Callable[ParamSpecT, ReturnT]) -> Callable[ParamSpecT, Retur
         or func_name == "concurrent.futures.thread._worker"
     ):
         return func
-    parent_tree = current_tree_or_none()
-    action_name = as_name(func)
+    parent_trace = current_trace_or_none()
+    span_name = as_name(func)
     caller_location = as_caller_name()
-    tree_id = next_tree_id()
-    if parent_tree:
-        parent_tree.current_action.add_tree_child(tree_id)
+    trace_id = next_trace_id()
+    if parent_trace:
+        parent_trace.current_span.add_trace_child(trace_id)
 
     def wrapped_func(*args: ParamSpecT.args, **kwargs: ParamSpecT.kwargs) -> ReturnT:
-        task = LogTree(
-            action_name,
-            action_kwargs={CALL_LOCATION: caller_location},
-            parent_tree=parent_tree,
-            tree_id=tree_id,
+        task = LogTrace(
+            span_name,
+            span_kwargs={CALL_LOCATION: caller_location},
+            parent_trace=parent_trace,
+            trace_id=trace_id,
         )
         with task:
             return func(*args, **kwargs)

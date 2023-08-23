@@ -9,11 +9,11 @@ from rich.traceback import Trace
 
 from span_tree.call_location import as_caller_name
 from span_tree.constants import (
-    ACTION_NAME_FIELD,
-    ACTION_STATUS_FIELD,
     ASYNC_TASK_NAME,
     CALL_LOCATION,
     ON_EXIT,
+    SPAN_NAME_FIELD,
+    SPAN_STATUS_FIELD,
     STATUS_CREATED,
     STATUS_FAILED,
     STATUS_STARTED,
@@ -31,42 +31,42 @@ NODE_TYPE_EXIT_ERROR = "exit_error"
 NODE_TYPE_EXCEPT_ERROR = "except_error"
 NODE_TYPE_REF_SRC = "ref_src"
 NODE_TYPE_REF_DEST = "ref_dest"
-NODE_TYPE_TREE_CHILD = "tree_child"
-NODE_TYPE_TREE_PARENT = "tree_parent"
+NODE_TYPE_TREE_CHILD = "trace_child"
+NODE_TYPE_TREE_PARENT = "trace_parent"
 
 
-def as_tree_child_id(key: str, value: Any) -> str | None:
+def as_trace_child_id(key: str, value: Any) -> str | None:
     if key.startswith(NODE_TYPE_TREE_CHILD):
         assert isinstance(value, dict)
         return value["id"]
     return None
 
 
-def as_tree_parent_id(key: str, value: Any) -> str | None:
+def as_trace_parent_id(key: str, value: Any) -> str | None:
     if key.startswith(NODE_TYPE_TREE_PARENT):
         assert isinstance(value, dict)
-        return value["tree_id"]
+        return value["trace_id"]
     return None
 
 
-class LogAction(UserDict):
+class LogSpan(UserDict):
     def __init__(
         self,
         name: str,
-        on_exit: Callable[[LogAction, ErrorTuple | None], None] | None = None,
+        on_exit: Callable[[LogSpan, ErrorTuple | None], None] | None = None,
         *args,
         **kwargs,
     ):
         super().__init__(*args, **kwargs)
-        self[ACTION_STATUS_FIELD] = STATUS_CREATED
+        self[SPAN_STATUS_FIELD] = STATUS_CREATED
         self[_NODE_COUNTER] = 0
-        self[ACTION_NAME_FIELD] = name
+        self[SPAN_NAME_FIELD] = name
         if on_exit:
             self[ON_EXIT] = on_exit
 
-    def __enter__(self) -> LogAction:
+    def __enter__(self) -> LogSpan:
         assert self.status == STATUS_CREATED
-        self[ACTION_STATUS_FIELD] = STATUS_STARTED
+        self[SPAN_STATUS_FIELD] = STATUS_STARTED
         self[TS_START_FIELD] = time()
         if CALL_LOCATION not in self:
             self[CALL_LOCATION] = as_caller_name()
@@ -74,7 +74,7 @@ class LogAction(UserDict):
 
     def __exit__(self, exc_type, exc_val, exc_tb):
         self[TS_END_FIELD] = time()
-        self[ACTION_STATUS_FIELD] = STATUS_FAILED if exc_val else STATUS_SUCCEEDED
+        self[SPAN_STATUS_FIELD] = STATUS_FAILED if exc_val else STATUS_SUCCEEDED
         if on_complete := self.get(ON_EXIT):
             error_tuple = (exc_type, exc_val, exc_tb) if exc_val else None
             on_complete(self, error_tuple)
@@ -84,7 +84,7 @@ class LogAction(UserDict):
 
     @property
     def name(self) -> str:
-        return self[ACTION_NAME_FIELD]
+        return self[SPAN_NAME_FIELD]
 
     @property
     def call_location(self) -> str:
@@ -102,15 +102,15 @@ class LogAction(UserDict):
 
     @property
     def status(self) -> Literal["running", "done"]:
-        return self[ACTION_STATUS_FIELD]
+        return self[SPAN_STATUS_FIELD]
 
     @property
     def is_running(self) -> bool:
-        return self[ACTION_STATUS_FIELD] == STATUS_STARTED
+        return self[SPAN_STATUS_FIELD] == STATUS_STARTED
 
     @property
     def is_done(self) -> bool:
-        return self[ACTION_STATUS_FIELD] in {STATUS_FAILED, STATUS_SUCCEEDED}
+        return self[SPAN_STATUS_FIELD] in {STATUS_FAILED, STATUS_SUCCEEDED}
 
     @property
     def timestamp(self) -> float:
@@ -139,7 +139,7 @@ class LogAction(UserDict):
     def next_child_index(self) -> int:
         current_child = self.setdefault(_CHILD_INDEX, -1)
         child_number = self[_CHILD_INDEX] = current_child + 1
-        # ADDING a child placeholder used for rendering the tree
+        # ADDING a child placeholder used for rendering the trace
         self[f"{_CHILD_PLACEHOLDER}{child_number}"] = ...
         return child_number
 
@@ -154,12 +154,12 @@ class LogAction(UserDict):
     def add_log(self, level: str, message: str) -> None:
         self[self._next_node_counter_key(level)] = message
 
-    def add_tree_parent(self, name: str, tree_id: str) -> None:
+    def add_trace_parent(self, name: str, trace_id: str) -> None:
         self[self._next_node_counter_key(NODE_TYPE_TREE_PARENT)] = dict(
-            name=name, tree_id=tree_id
+            name=name, trace_id=trace_id
         )
 
-    def add_tree_child(self, child_id: str) -> None:
+    def add_trace_child(self, child_id: str) -> None:
         self[self._next_node_counter_key(NODE_TYPE_TREE_CHILD)] = dict(id=child_id)
 
     def iter_nodes(self) -> Iterable[tuple[str, Any]]:

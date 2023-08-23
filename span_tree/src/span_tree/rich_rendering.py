@@ -7,21 +7,21 @@ from rich.tree import Tree
 from typing_extensions import TypeAlias
 from zero_3rdparty.datetime_utils import dump_date_as_rfc3339
 
-from span_tree.log_action import (
+from span_tree.log_span import (
     NODE_TYPE_EXIT_ERROR,
-    as_tree_child_id,
-    as_tree_parent_id,
+    as_trace_child_id,
+    as_trace_parent_id,
 )
-from span_tree.log_tree import LogTree
+from span_tree.log_trace import LogTrace
 
 MAX_FRAMES_ERROR = 5
 
-ReadTree: TypeAlias = Callable[[str], LogTree | None]
+ReadTrace: TypeAlias = Callable[[str], LogTrace | None]
 
 
-class HasParentTreeError(Exception):
-    def __init__(self, parent_tree_id: str):
-        self.parent_tree_id = parent_tree_id
+class HasParentTraceError(Exception):
+    def __init__(self, parent_trace_id: str):
+        self.parent_trace_id = parent_trace_id
 
 
 _console: Console = Console(
@@ -49,66 +49,66 @@ def temp_console(console: Console) -> Console:
         set_console(old)
 
 
-def create_rich_tree(
-    log_tree: LogTree,
-    reader: ReadTree,
+def create_rich_trace(
+    log_trace: LogTrace,
+    reader: ReadTrace,
     raise_on_has_parent: bool = False,
 ) -> tuple[Tree, set[str]]:
-    root_tree_id = log_tree.tree_id
-    ids = {root_tree_id}
+    root_trace_id = log_trace.trace_id
+    ids = {root_trace_id}
 
-    def add_subtree(node: Tree, key: str, value: Any) -> Tree:
-        if raise_on_has_parent and (parent_id := as_tree_parent_id(key, value)):
-            if parent_id != root_tree_id:
-                raise HasParentTreeError(parent_id)
-        if child_id := as_tree_child_id(key, value):
-            if child_tree := reader(child_id):
+    def add_subtrace(node: Tree, key: str, value: Any) -> Trace:
+        if raise_on_has_parent and (parent_id := as_trace_parent_id(key, value)):
+            if parent_id != root_trace_id:
+                raise HasParentTraceError(parent_id)
+        if child_id := as_trace_child_id(key, value):
+            if child_trace := reader(child_id):
                 ids.add(child_id)
-                child_root = convert_tree(child_tree, node_adder=add_subtree)
+                child_root = convert_tree(child_trace, node_adder=add_subtrace)
                 return node.add(child_root)
         return _default_node_adder(node, key, value)
 
-    tree = convert_tree(log_tree, node_adder=add_subtree)
-    return tree, ids
+    trace = convert_tree(log_trace, node_adder=add_subtrace)
+    return trace, ids
 
 
-def print_tree_call(render_call_locations: bool = True) -> Callable[[LogTree], Tree]:
-    def print_tree(tree: LogTree):
-        rich_tree = convert_tree(tree, render_call_locations=render_call_locations)
-        _console.print(rich_tree)
-        return rich_tree
+def print_trace_call(render_call_locations: bool = True) -> Callable[[LogTrace], Trace]:
+    def print_trace(trace: LogTrace):
+        rich_trace = convert_tree(trace, render_call_locations=render_call_locations)
+        _console.print(rich_trace)
+        return rich_trace
 
-    return print_tree
-
-
-_ACTION_NODE = "__ACTION_NODE__"
+    return print_trace
 
 
-def _tree_and_node_adder(tree: LogTree) -> tuple[Tree, Callable[[str, str], Tree]]:
-    root = Tree(f"[b]{tree.tree_id}")
+_SPAN_NODE = "__SPAN_NODE__"
 
-    def add_action_node(index: str, header: str) -> Tree:
+
+def _tree_and_node_adder(trace: LogTrace) -> tuple[Tree, Callable[[str, str], Tree]]:
+    root = Tree(f"[b]{trace.trace_id}")
+
+    def add_span_node(index: str, header: str) -> Tree:
         if index == "0":
-            action_node = root.add(header)
-            setattr(action_node, _ACTION_NODE, True)
-            return action_node
+            span_node = root.add(header)
+            setattr(span_node, _SPAN_NODE, True)
+            return span_node
         *indexes, _, __ = index.split("/")
         node = root.children[0]
         for level_index in indexes:
-            action_children = [
-                child for child in node.children if hasattr(child, _ACTION_NODE)
+            span_children = [
+                child for child in node.children if hasattr(child, _SPAN_NODE)
             ]
-            node = action_children[int(level_index)]
+            node = span_children[int(level_index)]
         index = next(i for i, child in enumerate(node.children) if child is ...)
-        action_node = Tree(header)
-        setattr(action_node, _ACTION_NODE, True)
-        node.children[index] = action_node
-        return action_node
+        span_node = Tree(header)
+        setattr(span_node, _SPAN_NODE, True)
+        node.children[index] = span_node
+        return span_node
 
-    return root, add_action_node
+    return root, add_span_node
 
 
-def _default_node_adder(node: Tree, key: str, value: Any) -> Tree:
+def _default_node_adder(node: Trace, key: str, value: Any) -> Trace:
     if isinstance(value, Trace):
         is_error = key.startswith(NODE_TYPE_EXIT_ERROR)
         node_tb = node.add(key, style="red" if is_error else "yellow")
@@ -121,27 +121,27 @@ def _default_node_adder(node: Tree, key: str, value: Any) -> Tree:
 
 
 def convert_tree(
-    tree: LogTree,
+    trace: LogTrace,
     render_call_locations: bool = True,
     node_adder: Callable[[Tree, str, Any], Tree] | None = None,
 ) -> Tree:
-    root, add_action_node = _tree_and_node_adder(tree)
+    root, add_span_node = _tree_and_node_adder(trace)
     node_adder = node_adder or _default_node_adder
 
-    for tree_index, a in tree.actions.items():
+    for trace_index, a in trace.spans.items():
         color = "green" if a.is_ok else "red"
         ts = dump_date_as_rfc3339(a.timestamp, strip_microseconds=True).replace(
             "+00:00", "Z"
         )
-        action_header = f"[b {color}]{a.name} => {a.status}[/] [cyan]{ts}[/] ⧖ [blue]{a.duration_ms*1000:.3f}ms[/]"
+        span_header = f"[b {color}]{a.name} => {a.status}[/] [cyan]{ts}[/] ⧖ [blue]{a.duration_ms*1000:.3f}ms[/]"
 
-        node = add_action_node(tree_index, action_header)
+        node = add_span_node(trace_index, span_header)
         if render_call_locations:
             node.add(a.call_location)
         for key, value in a.iter_nodes_with_child_placeholders():
             if value is ...:
                 node.children.append(...)
-                # will be replaced by next action
+                # will be replaced by next span
                 continue
             node_adder(node, key, value)
     return root
