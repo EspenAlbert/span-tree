@@ -3,6 +3,7 @@ name: pants_init
 inputs:
   gh_pat:
     required: true
+
 runs:
   using: composite
   steps:
@@ -14,3 +15,6 @@ runs:
       # cache0 makes it easy to bust the cache if needed
       gha-cache-key: cache0-py-3-10
       named-caches-hash: ${{ hashFiles('3rdparty/*.txt') }}
+  - uses: actions/setup-python@v4
+    with:
+      python-version: '3.11'

@@ -15,9 +15,6 @@ jobs:
         uses: "./.github/templates/pants_init"
         with:
           gh_pat: secrets.GH_PAT
-      - uses: actions/setup-python@v4
-        with:
-          python-version: '3.11'
       - name: Check BUILD files
         run: "pants tailor --check update-build-files --check ::"
       - name: Lint
