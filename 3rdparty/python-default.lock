@@ -27,7 +27,7 @@
 //     "ruff==0.0.285",
 //     "typing_extensions>=4.3.0",
 //     "xdoctest==0.15.4",
-//     "zero-3rdparty==0.0.27"
+//     "zero-3rdparty==0.0.28"
 //   ],
 //   "manylinux": "manylinux2014",
 //   "requirement_constraints": [],
@@ -1373,8 +1373,8 @@
           "artifacts": [
             {
               "algorithm": "sha256",
-              "hash": "5487b1320b06fd5453c9137563f6058830f4bfb0f7d6154aa95b09395ad4aafb",
-              "url": "https://files.pythonhosted.org/packages/08/31/9c7bee6f639423f16094fe69d06645d55acc26cc4054d615bfbd0948fbd8/zero_3rdparty-0.0.27-py3-none-any.whl"
+              "hash": "5336eac8f96a08f1d2a78d4544cc192b228fa23126fdd227f2b07d5ca3915fca",
+              "url": "https://files.pythonhosted.org/packages/1e/3a/d0687c0b371500898021d90fe5faae335ebe52831c7286a18c521cc6cf23/zero_3rdparty-0.0.28-py3-none-any.whl"
             }
           ],
           "project_name": "zero-3rdparty",
@@ -1385,7 +1385,7 @@
             "typing-extensions>=4.3.0"
           ],
           "requires_python": ">=3.9",
-          "version": "0.0.27"
+          "version": "0.0.28"
         }
       ],
       "platform_tag": null
@@ -1414,7 +1414,7 @@
     "ruff==0.0.285",
     "typing_extensions>=4.3.0",
     "xdoctest==0.15.4",
-    "zero-3rdparty==0.0.27"
+    "zero-3rdparty==0.0.28"
   ],
   "requires_python": [
     "==3.11.*"

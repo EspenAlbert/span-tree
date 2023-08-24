@@ -6,4 +6,4 @@ packages:
 - requests==2.31.0
 - rich==13.5.2
 - typing_extensions
-- zero-3rdparty==0.0.27
+- zero-3rdparty==0.0.28

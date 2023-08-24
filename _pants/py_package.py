@@ -8,7 +8,7 @@ PROJECT_URLS = (
     ("Documentation", "https://espenalbert.github.io/py-libs/"),
 )
 
-
+# PANTS_BASE_START
 def py_package(
     *,
     description: str,
@@ -34,7 +34,6 @@ def py_package(
     extras_require.update({k: list(v) for k, v in STATIC_EXTRAS})
     python_distribution(
         name=distribution_name,
-        # orjson is not a hard requirement
         dependencies=explicit_dependencies or all_dependencies,
         long_description_path=f"{folder_name}/readme.md",
         provides=setup_py(
@@ -52,3 +51,5 @@ def py_package(
         sdist=False,
         repositories=["@pypi"],
     )
+
+# PANTS_BASE_END
