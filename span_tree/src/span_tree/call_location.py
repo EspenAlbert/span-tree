@@ -7,12 +7,12 @@ _MODULE_NAME = __name__.split(".")[0]
 
 
 def as_caller_name() -> str:
-    frame: FrameType | None = currentframe().f_back
+    frame: FrameType | None = currentframe().f_back  # type: ignore
     for frames_back in range(10):
         if frame is None:
             return ""
         frame = frame.f_back
-        package = frame.f_globals["__package__"]
+        package = frame.f_globals["__package__"]  # type: ignore
         if package != _MODULE_NAME:
             break
     if frame is None:

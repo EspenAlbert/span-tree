@@ -40,8 +40,8 @@ def set_console(console: Console) -> Console:
     return old
 
 
-@contextmanager
-def temp_console(console: Console) -> Console:
+@contextmanager  # type: ignore
+def temp_console(console: Console) -> Console:  # type: ignore
     old = set_console(console)
     try:
         yield old
@@ -57,7 +57,7 @@ def create_rich_trace(
     root_trace_id = log_trace.trace_id
     ids = {root_trace_id}
 
-    def add_subtrace(node: Tree, key: str, value: Any) -> Trace:
+    def add_subtrace(node: Tree, key: str, value: Any) -> Tree:
         if raise_on_has_parent and (parent_id := as_trace_parent_id(key, value)):
             if parent_id != root_trace_id:
                 raise HasParentTraceError(parent_id)
@@ -87,28 +87,30 @@ _SPAN_NODE = "__SPAN_NODE__"
 def _tree_and_node_adder(trace: LogTrace) -> tuple[Tree, Callable[[str, str], Tree]]:
     root = Tree(f"[b]{trace.trace_id}")
 
-    def add_span_node(index: str, header: str) -> Tree:
-        if index == "0":
+    def add_span_node(index_str: str, header: str) -> Tree:
+        if index_str == "0":
             span_node = root.add(header)
             setattr(span_node, _SPAN_NODE, True)
             return span_node
-        *indexes, _, __ = index.split("/")
+        *indexes, _, __ = index_str.split("/")
         node = root.children[0]
         for level_index in indexes:
             span_children = [
                 child for child in node.children if hasattr(child, _SPAN_NODE)
             ]
             node = span_children[int(level_index)]
-        index = next(i for i, child in enumerate(node.children) if child is ...)
+        index_int: int = next(
+            i for i, child in enumerate(node.children) if child is ...
+        )
         span_node = Tree(header)
         setattr(span_node, _SPAN_NODE, True)
-        node.children[index] = span_node
+        node.children[index_int] = span_node
         return span_node
 
     return root, add_span_node
 
 
-def _default_node_adder(node: Trace, key: str, value: Any) -> Trace:
+def _default_node_adder(node: Tree, key: str, value: Any) -> Tree:
     if isinstance(value, Trace):
         is_error = key.startswith(NODE_TYPE_EXIT_ERROR)
         node_tb = node.add(key, style="red" if is_error else "yellow")
@@ -140,7 +142,7 @@ def convert_tree(
             node.add(span.call_location)
         for key, value in span.events_with_child_placeholders:
             if value is ...:
-                node.children.append(...)
+                node.children.append(...)  # type: ignore
                 # will be replaced by next span
                 continue
             node_adder(node, key, value)

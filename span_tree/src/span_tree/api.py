@@ -105,7 +105,7 @@ class SpanLogger(logging.LoggerAdapter):
         ref_src: bool = False,
         ref_dest: str = "",
         **kwargs,
-    ) -> str:
+    ) -> str | None:
         return log_extra(
             self.logger, msg, level, ref_src=ref_src, ref_dest=ref_dest, **kwargs
         )
