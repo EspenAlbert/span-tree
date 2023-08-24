@@ -1,3 +1,26 @@
+<p align="center">
+    <a href="https://github.com/EspenAlbert/span-tree/actions/workflows/ci.yaml" target="_blank">
+        <img src="https://github.com/EspenAlbert/span-tree/actions/workflows/ci.yaml/badge.svg">
+    </a>
+    <a href="https://pypi.org/project/span-tree/" target="_blank">
+        <img src="https://img.shields.io/pypi/v/span-tree.svg">
+    </a>
+    <a href="https://pypi.org/project/span-tree/" target="_blank">
+        <img src="https://img.shields.io/pypi/pyversions/span-tree.svg">
+    </a>
+    <a href="https://codecov.io/gh/EspenAlbert/span-tree" target="_blank">
+        <img src="https://img.shields.io/codecov/c/github/EspenAlbert/span-tree?color=%2334D058" alt="Coverage">
+    </a>
+    <a href="https://github.com/psf/black" target="_blank">
+            <img src="https://img.shields.io/badge/code%20style-black-000000.svg" alt="Code style: black">
+    </a>
+    <a href="https://github.com/EspenAlbert/span-tree/blob/main/LICENSE" target="_blank">
+            <img src="https://img.shields.io/badge/License-MIT-yellow.svg" alt="License">
+    </a>
+    <a href="https://github.com/pre-commit/pre-commit"><img src="https://img.shields.io/badge/pre--commit-enabled-brightgreen?logo=pre-commit" alt="pre-commit" style="max-width:100%;"></a>
+
+</p>
+
 # span-trace
 
 - [Library Details](span_tree/readme.md)

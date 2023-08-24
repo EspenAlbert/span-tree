@@ -1,4 +1,4 @@
-# span-trace
+# span-tree
 - see context info in [Github Repo](https://github.com/EspenAlbert/span-tree)
 
 ## Installation
