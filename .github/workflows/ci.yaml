@@ -1,0 +1,39 @@
+name: CI - Lint Test Package
+
+on:
+  push:
+    branches:
+      - "**"
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          token: ${{ secrets.GH_PAT }}
+      - name: pants_init
+        uses: "./.github/templates/pants_init"
+        with:
+          gh_pat: secrets.GH_PAT
+      - uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+      - name: Check BUILD files
+        run: "pants tailor --check update-build-files --check ::"
+      - name: Lint
+        run: |
+          pants lint ::
+        if: success() || failure()
+      - name: Test
+        if: success() || failure()
+        run: |
+          export PANTS_TEST_USE_COVERAGE=true
+          pants test ::
+      - name: Package
+        if: success() || failure()
+        run: "pants --tag='-arm' package ::"
+      - name: Upload coverage
+        uses: codecov/codecov-action@v3
+        if: success() || failure()
+        with:
+          files: ./dist/coverage/python/coverage.xml
