@@ -2,6 +2,7 @@ VERSION = "0.0.1"
 STATIC_EXTRAS = ()
 CLASSIFIERS = (
     "Programming Language :: Python :: 3.11",
+    "Development Status :: 2 - Pre-Alpha"
 )
 PROJECT_URLS = (
     ("Source", "https://github.com/EspenAlbert/py-libs/tree/main/"),
